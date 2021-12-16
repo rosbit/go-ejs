@@ -4,6 +4,7 @@ import (
 	"github.com/dop251/goja"
 	"fmt"
 	"os"
+	"time"
 )
 
 func NewVM(env map[string]interface{}) *JsVm {
@@ -75,6 +76,11 @@ func (js *JsVm) CallFunc(funcName string, args ...interface{}) (res interface{},
 	return
 }
 
+// @param funcVarPtr  in format `var funcVar func(....) ...; funcVarPtr = &funcVar`
+func (js *JsVm) BindFunc(funcName string, funcVarPtr interface{}) (err error) {
+	return js.vm.ExportTo(js.vm.Get(funcName), funcVarPtr)
+}
+
 func (js *JsVm) getEnv(key string) interface{} {
 	if len(key) == 0 || len(js.env) == 0 {
 		return goja.Undefined()
@@ -110,11 +116,22 @@ func (js *JsVm) callback(name string, op string, args []interface{}) interface{}
 	return goja.Undefined()
 }
 
+func formatTimestamp(tm int64, layout ...string) string {
+	var l string
+	if len(layout) > 0 && len(layout[0]) > 0 {
+		l = layout[0]
+	} else {
+		l = "2006-01-02 15:04:05"
+	}
+	return time.Unix(tm, 0).Format(l)
+}
+
 func (js *JsVm) createJSContext(vars map[string]interface{}) {
 	js.vm = goja.New()
 	js.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 	js.AddVars(vars)
 	js.vm.Set("_cb_", js.callback)
 	js.vm.Set("print", fmt.Println)
+	js.vm.Set("formatTimestamp", formatTimestamp)
 	js.vm.RunString(globalJsFuncs)
 }
