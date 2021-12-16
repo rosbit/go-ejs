@@ -33,6 +33,10 @@ func (js *jsVM) AddVars(vars map[string]interface{}) {
 	}
 }
 
+func (js *jsVM) AddVar(name string, val interface{}) {
+	js.vm.Set(name, val)
+}
+
 func (js *jsVM) EvalFile(path string) (res interface{}, err error) {
 	b, e := os.ReadFile(path)
 	if e != nil {
