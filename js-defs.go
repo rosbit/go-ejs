@@ -4,7 +4,7 @@ import (
 	"github.com/dop251/goja"
 )
 
-type jsVM struct {
+type JsVm struct {
 	vm *goja.Runtime
 	env map[string]interface{}
 }
