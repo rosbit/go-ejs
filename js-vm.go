@@ -130,8 +130,11 @@ func (js *JsVm) createJSContext(vars map[string]interface{}) {
 	js.vm = goja.New()
 	js.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
 	js.AddVars(vars)
-	js.vm.Set("_cb_", js.callback)
-	js.vm.Set("print", fmt.Println)
-	js.vm.Set("formatTimestamp", formatTimestamp)
+	js.AddVars(map[string]interface{}{
+		"_cb_": js.callback,
+		"print": fmt.Println,
+		"formatTimestamp": formatTimestamp,
+		"sprintf": fmt.Sprintf,
+	})
 	js.vm.RunString(globalJsFuncs)
 }
