@@ -38,6 +38,22 @@ func (js *JsVm) AddVar(name string, val interface{}) {
 	js.vm.Set(name, val)
 }
 
+func (js *JsVm) GetGlobal(name string) (res interface{}, err error) {
+	defer func() {
+		if r := recover(); r != nil {
+			var ok bool
+			if err, ok = r.(error); ok {
+				return
+			}
+			err = fmt.Errorf("panic in FnTxStmt: %v", r)
+		}
+	}()
+
+	v := js.vm.Get(name)
+	res = v.Export()
+	return
+}
+
 func (js *JsVm) EvalFile(path string) (res interface{}, err error) {
 	b, e := os.ReadFile(path)
 	if e != nil {

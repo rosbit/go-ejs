@@ -5,6 +5,8 @@ console.log("formatTime(1639632557) =>", formatTimestamp(1639632557))
 // js.call("dump", 1, 2)
 // js.call("dump1", 1, "hello")
 
+g_a = "value of global var a"
+
 function test(a1, b1) {
 	console.log("---- test ----")
 	console.log("pi =>", sprintf("%.2f", 3.1415926))

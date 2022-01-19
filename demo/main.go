@@ -54,4 +54,11 @@ func main() {
 		return
 	}
 	fmt.Printf(" => %v\n", res)
+
+	res, err = jsVM.GetGlobal("g_a")
+	if err != nil {
+		fmt.Printf("%v\n", err)
+		return
+	}
+	fmt.Printf("g_a: %v\n", res)
 }
