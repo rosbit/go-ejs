@@ -45,7 +45,7 @@ func (js *JsVm) GetGlobal(name string) (res interface{}, err error) {
 			if err, ok = r.(error); ok {
 				return
 			}
-			err = fmt.Errorf("panic in FnTxStmt: %v", r)
+			err = fmt.Errorf("panic in GetGlobal(%s): %v", name, r)
 		}
 	}()
 
