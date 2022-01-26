@@ -88,7 +88,7 @@ func main() {
 In JavaScript code, one can call the registered name directly. There's the example `b.js`.
 
 ```javascript
-r = adder(1, 100)   # the function "adder" is implemented in Go
+r = adder(1, 100)   // the function "adder" is implemented in Go
 console.log(r)
 ```
 
