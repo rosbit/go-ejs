@@ -54,16 +54,19 @@ func (js *JsVm) GetGlobal(name string) (res interface{}, err error) {
 	return
 }
 
-func (js *JsVm) EvalFile(path string) (res interface{}, err error) {
+func (js *JsVm) EvalFile(path string, vars ...map[string]interface{}) (res interface{}, err error) {
 	b, e := os.ReadFile(path)
 	if e != nil {
 		err = e
 		return
 	}
-	return js.Eval(string(b))
+	return js.Eval(string(b), vars...)
 }
 
-func (js *JsVm) Eval(script string) (res interface{}, err error) {
+func (js *JsVm) Eval(script string, vars ...map[string]interface{}) (res interface{}, err error) {
+	if len(vars) > 0 {
+		js.AddVars(vars[0])
+	}
 	v, e := js.vm.RunString(script)
 	if e != nil {
 		err = e
