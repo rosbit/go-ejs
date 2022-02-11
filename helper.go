@@ -24,18 +24,17 @@ func InitCache() {
 	jsCtxCache = make(map[string]*jsCtx)
 }
 
-func LoadFileFromCache(path string, vars map[string]interface{}) (ctx *JsVm, err error) {
+func LoadFileFromCache(path string, envs, vars map[string]interface{}) (ctx *JsVm, err error) {
 	lock.Lock()
 	defer lock.Unlock()
 
 	jsC, ok := jsCtxCache[path]
 
 	if !ok {
-		ctx = NewVM(nil)
-		if err = ctx.LoadFile(path, nil); err != nil {
+		ctx = NewVM(envs)
+		if err = ctx.LoadFile(path, vars); err != nil {
 			return
 		}
-		ctx.AddVars(vars)
 		fi, _ := os.Stat(path)
 		jsC = &jsCtx{
 			jsvm: ctx,
@@ -52,11 +51,10 @@ func LoadFileFromCache(path string, vars map[string]interface{}) (ctx *JsVm, err
 	}
 	mt := fi.ModTime()
 	if jsC.mt.Before(mt) {
-		if err = jsC.jsvm.LoadFile(path, nil); err != nil {
+		if err = jsC.jsvm.LoadFile(path, vars); err != nil {
 			return
 		}
 		jsC.mt = mt
-		jsC.jsvm.AddVars(vars)
 	}
 	ctx = jsC.jsvm
 	return
