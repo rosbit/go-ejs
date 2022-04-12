@@ -100,6 +100,15 @@ func (js *JsVm) BindFunc(funcName string, funcVarPtr interface{}) (err error) {
 	return js.vm.ExportTo(js.vm.Get(funcName), funcVarPtr)
 }
 
+func (js *JsVm) BindFuncs(funcName2FuncVarPtr map[string]interface{}) (err error) {
+	for funcName, funcVarPtr := range funcName2FuncVarPtr {
+		if err = js.BindFunc(funcName, funcVarPtr); err != nil {
+			return
+		}
+	}
+	return
+}
+
 func (js *JsVm) getEnv(key string) interface{} {
 	if len(key) == 0 || len(js.env) == 0 {
 		return goja.Undefined()
