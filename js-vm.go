@@ -13,6 +13,10 @@ func NewVM(env map[string]interface{}) *JsVm {
 	return js
 }
 
+func NewContext() *JsVm {
+	return NewVM(nil)
+}
+
 func (js *JsVm) LoadFile(path string, vars map[string]interface{}) (err error) {
 	b, e := os.ReadFile(path)
 	if e != nil {
@@ -149,14 +153,15 @@ func formatTimestamp(tm int64, layout ...string) string {
 	if len(layout) > 0 && len(layout[0]) > 0 {
 		l = layout[0]
 	} else {
-		l = "2006-01-02 15:04:05"
+		l = time.DateTime
 	}
 	return time.Unix(tm, 0).Format(l)
 }
 
 func (js *JsVm) createJSContext(vars map[string]interface{}) {
 	js.vm = goja.New()
-	js.vm.SetFieldNameMapper(goja.TagFieldNameMapper("json", true))
+	reqReg.Enable(js.vm)
+	js.vm.SetFieldNameMapper(goja.UncapFieldNameMapper())
 	js.AddVars(vars)
 	js.AddVars(map[string]interface{}{
 		"_cb_": js.callback,

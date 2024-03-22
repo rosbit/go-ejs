@@ -1,8 +1,11 @@
 package ejs
 
 import (
+	"github.com/dop251/goja_nodejs/require"
 	"github.com/dop251/goja"
 )
+
+var reqReg *require.Registry
 
 type JsVm struct {
 	vm *goja.Runtime
@@ -21,3 +24,7 @@ function _ENV(name) {
 var console = {log:print,warn:print,error:print,info:print}
 var js = {call:_CALL, env:_ENV}
 `
+
+func init() {
+	reqReg = new(require.Registry)
+}
