@@ -24,7 +24,11 @@ func InitCache() {
 	jsCtxCache = make(map[string]*jsCtx)
 }
 
-func LoadFileFromCache(path string, envs, vars map[string]interface{}) (ctx *JsVm, err error) {
+func LoadFileFromCache(path string, vars map[string]interface{}) (ctx *JsVm, err error) {
+	return LoadFileFromCacheWithEnvs(path, nil, vars)
+}
+
+func LoadFileFromCacheWithEnvs(path string, envs, vars map[string]interface{}) (ctx *JsVm, err error) {
 	lock.Lock()
 	defer lock.Unlock()
 

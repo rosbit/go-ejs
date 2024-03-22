@@ -18,7 +18,7 @@ import "fmt"
 import "github.com/rosbit/go-ejs"
 
 func main() {
-  ctx := ejs.NewVM(nil)
+  ctx := ejs.NewContext()
 
   res, _ := ctx.Eval("1 + 2")
   fmt.Println("result is:", res)
@@ -46,7 +46,7 @@ import "github.com/rosbit/go-ejs"
 var add func(int, int)int
 
 func main() {
-  ctx := ejs.NewVM(nil)
+  ctx := ejs.NewContext()
   if err := ctx.LoadFile("a.js", nil); err != nil {
      fmt.Printf("%v\n", err)
      return
@@ -78,7 +78,7 @@ func adder(a1 float64, a2 float64) float64 {
 }
 
 func main() {
-  ctx := ejs.NewVM(nil)
+  ctx := ejs.NewContext()
 
   ctx.AddVar("adder", adder)
   ctx.EvalFile("b.js", nil)  // b.js containing code calling "adder"
@@ -110,7 +110,7 @@ func main() {
      "a": []int{1,2,3}, // to JavaScript array
   }
 
-  ctx := js.NewVM(nil)
+  ctx := js.NewContext()
   if err := ctx.LoadFile("file.js", vars); err != nil {
      fmt.Printf("%v\n", err)
      return
