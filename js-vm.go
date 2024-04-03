@@ -2,13 +2,14 @@ package ejs
 
 import (
 	"github.com/dop251/goja"
+	"sync"
 	"fmt"
 	"os"
 	"time"
 )
 
 func NewVM(env map[string]interface{}) *JsVm {
-	js := &JsVm{env: env}
+	js := &JsVm{env: env, lock: &sync.Mutex{}}
 	js.createJSContext(nil)
 	return js
 }
@@ -17,18 +18,21 @@ func NewContext() *JsVm {
 	return NewVM(nil)
 }
 
+func (js *JsVm) BeginSafeCall() {
+	js.lock.Lock()
+}
+
+func (js *JsVm) EndSafeCall() {
+	js.lock.Unlock()
+}
+
 func (js *JsVm) LoadFile(path string, vars map[string]interface{}) (err error) {
-	b, e := os.ReadFile(path)
-	if e != nil {
-		err = e
-		return
-	}
-	return js.LoadScript(string(b), vars)
+	_, err = js.EvalFile(path, vars)
+	return
 }
 
 func (js *JsVm) LoadScript(script string, vars map[string]interface{}) (err error) {
-	js.createJSContext(vars)
-	_, err = js.vm.RunString(script)
+	_, err = js.Eval(script, vars)
 	return
 }
 
@@ -43,6 +47,9 @@ func (js *JsVm) AddVar(name string, val interface{}) {
 }
 
 func (js *JsVm) GetGlobal(name string) (res interface{}, err error) {
+	js.lock.Lock()
+	defer js.lock.Unlock()
+
 	defer func() {
 		if r := recover(); r != nil {
 			var ok bool
@@ -59,15 +66,36 @@ func (js *JsVm) GetGlobal(name string) (res interface{}, err error) {
 }
 
 func (js *JsVm) EvalFile(path string, vars ...map[string]interface{}) (res interface{}, err error) {
+	js.lock.Lock()
+	defer js.lock.Unlock()
+
 	b, e := os.ReadFile(path)
 	if e != nil {
 		err = e
 		return
 	}
-	return js.Eval(string(b), vars...)
+	if len(vars) > 0 {
+		js.AddVars(vars[0])
+	}
+	p, e := goja.Compile(path, string(b), true)
+	if e != nil {
+		err = e
+		return
+	}
+
+	v, e := js.vm.RunProgram(p)
+	if e != nil {
+		err = e
+		return
+	}
+	res = v.Export()
+	return
 }
 
 func (js *JsVm) Eval(script string, vars ...map[string]interface{}) (res interface{}, err error) {
+	js.lock.Lock()
+	defer js.lock.Unlock()
+
 	if len(vars) > 0 {
 		js.AddVars(vars[0])
 	}
@@ -81,6 +109,9 @@ func (js *JsVm) Eval(script string, vars ...map[string]interface{}) (res interfa
 }
 
 func (js *JsVm) CallFunc(funcName string, args ...interface{}) (res interface{}, err error) {
+	js.lock.Lock()
+	defer js.lock.Unlock()
+
 	f, ok := goja.AssertFunction(js.vm.Get(funcName))
 	if !ok {
 		err = fmt.Errorf("function name %s is not found in JS script", funcName)
@@ -101,6 +132,9 @@ func (js *JsVm) CallFunc(funcName string, args ...interface{}) (res interface{},
 
 // @param funcVarPtr  in format `var funcVar func(....) ...; funcVarPtr = &funcVar`
 func (js *JsVm) BindFunc(funcName string, funcVarPtr interface{}) (err error) {
+	js.lock.Lock()
+	defer js.lock.Unlock()
+
 	return js.vm.ExportTo(js.vm.Get(funcName), funcVarPtr)
 }
 

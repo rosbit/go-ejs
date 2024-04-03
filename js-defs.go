@@ -3,6 +3,7 @@ package ejs
 import (
 	"github.com/dop251/goja_nodejs/require"
 	"github.com/dop251/goja"
+	"sync"
 )
 
 var reqReg *require.Registry
@@ -10,6 +11,7 @@ var reqReg *require.Registry
 type JsVm struct {
 	vm *goja.Runtime
 	env map[string]interface{}
+	lock *sync.Mutex
 }
 
 const globalJsFuncs = `
