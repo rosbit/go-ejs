@@ -1,21 +1,23 @@
 package ejs
 
 import (
+	"github.com/dop251/goja_nodejs/require"
 	"github.com/dop251/goja"
+	"path/filepath"
 	"sync"
 	"fmt"
 	"os"
 	"time"
 )
 
-func NewVM(env map[string]interface{}) *JsVm {
+func NewVM(env map[string]interface{}, scriptHome ...string) *JsVm {
 	js := &JsVm{env: env, lock: &sync.Mutex{}}
-	js.createJSContext(nil)
+	js.createJSContext(/*nil,*/ scriptHome...)
 	return js
 }
 
-func NewContext() *JsVm {
-	return NewVM(nil)
+func NewContext(scriptHome ...string) *JsVm {
+	return NewVM(nil, scriptHome...)
 }
 
 func (js *JsVm) BeginSafeCall() {
@@ -192,11 +194,20 @@ func formatTimestamp(tm int64, layout ...string) string {
 	return time.Unix(tm, 0).Format(l)
 }
 
-func (js *JsVm) createJSContext(vars map[string]interface{}) {
+func (js *JsVm) createJSContext(/*vars map[string]interface{},*/ scriptHome ...string) {
+	var scriptHomeDir string
+	if len(scriptHome) > 0 && len(scriptHome[0]) > 0 {
+		scriptHomeDir = scriptHome[0]
+	} else {
+		execPath, _ := filepath.Abs(os.Args[0])
+		scriptHomeDir = filepath.Dir(execPath)
+	}
+
 	js.vm = goja.New()
-	reqReg.Enable(js.vm)
+	js.reqReg = require.NewRegistry(require.WithGlobalFolders(scriptHomeDir))
+	js.reqReg.Enable(js.vm)
 	js.vm.SetFieldNameMapper(goja.UncapFieldNameMapper())
-	js.AddVars(vars)
+	// js.AddVars(vars)
 	js.AddVars(map[string]interface{}{
 		"_cb_": js.callback,
 		"print": fmt.Println,

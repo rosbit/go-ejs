@@ -6,11 +6,10 @@ import (
 	"sync"
 )
 
-var reqReg *require.Registry
-
 type JsVm struct {
 	vm *goja.Runtime
 	env map[string]interface{}
+	reqReg *require.Registry
 	lock *sync.Mutex
 }
 
@@ -26,7 +25,3 @@ function _ENV(name) {
 var console = {log:print,warn:print,error:print,info:print}
 var js = {call:_CALL, env:_ENV}
 `
-
-func init() {
-	reqReg = new(require.Registry)
-}
