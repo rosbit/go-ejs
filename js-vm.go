@@ -195,16 +195,16 @@ func formatTimestamp(tm int64, layout ...string) string {
 }
 
 func (js *JsVm) createJSContext(/*vars map[string]interface{},*/ scriptHome ...string) {
-	var scriptHomeDir string
-	if len(scriptHome) > 0 && len(scriptHome[0]) > 0 {
-		scriptHomeDir = scriptHome[0]
+	var scriptHomeDir []string
+	if len(scriptHome) > 0 {
+		scriptHomeDir = scriptHome
 	} else {
 		execPath, _ := filepath.Abs(os.Args[0])
-		scriptHomeDir = filepath.Dir(execPath)
+		scriptHomeDir = []string{filepath.Dir(execPath)}
 	}
 
 	js.vm = goja.New()
-	js.reqReg = require.NewRegistry(require.WithGlobalFolders(scriptHomeDir))
+	js.reqReg = require.NewRegistry(require.WithGlobalFolders(scriptHomeDir...))
 	js.reqReg.Enable(js.vm)
 	js.vm.SetFieldNameMapper(goja.UncapFieldNameMapper())
 	// js.AddVars(vars)
