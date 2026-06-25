@@ -210,9 +210,10 @@ func (js *JsVm) createJSContext(/*vars map[string]interface{},*/ scriptHome ...s
 	// js.AddVars(vars)
 	js.AddVars(map[string]interface{}{
 		"_cb_": js.callback,
-		"print": fmt.Println,
+		//"print": fmt.Println,
 		"formatTimestamp": formatTimestamp,
 		"sprintf": fmt.Sprintf,
 	})
+	js.vm.Set("print", consolePrint)
 	js.vm.RunString(globalJsFuncs)
 }
