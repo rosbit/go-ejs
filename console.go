@@ -31,9 +31,9 @@ func formatValue(val goja.Value) string {
 
 	switch val.ExportType().Kind() {
 	case reflect.String:
-		return /*cGreen +*/ val.String() /*+ cReset*/
+		return cRed + val.String() + cReset
 	case reflect.Bool:
-		return /*cRed +*/ fmt.Sprintf("%v", val.Export()) /* + cReset */
+		return cRed + fmt.Sprintf("%v", val.Export()) + cReset
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64,
 		reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64,
 		reflect.Float32, reflect.Float64:
